@@ -2,6 +2,7 @@ import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./components/Login";
 import Register from "./components/Register";
+import FullRegisteration from "./components/FullRegisteration"
 import Home from "./components/Home";
 import Albums from "./components/Albums";
 import Album from "./components/Album";
@@ -18,7 +19,9 @@ function App() {
         <Routes>
           <Route path="/" element={<Aa />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/register" element={<Register />}/>
+            {/* <Route path="fullRegisteration" element={<FullRegisteration />} /> */}
+          {/* </Route> */}
           <Route path="home/users/:id" element={<HomeLayout />}>
             <Route index element={<Home />} />
             <Route>
