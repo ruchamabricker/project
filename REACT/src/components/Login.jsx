@@ -1,9 +1,10 @@
-import { useState } from "react";
+import React, { useState, useContext } from "react";
 import "./Login.css";
 import { useNavigate, Link } from 'react-router-dom';
+import { currentUserProvider }from '../App'
 
 function Login() {
-
+const {currentUser, SetcurrentUser}= useContext(currentUserProvider)
     const navigate = useNavigate();
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
@@ -18,8 +19,10 @@ function Login() {
             .then(users => {
                 const foundUser = users.find(u => u.website === password);
                 if (foundUser) {
-                    localStorage.setItem("user", JSON.stringify({id:foundUser.id, userName:username}));
+                    localStorage.setItem("user", JSON.stringify({ id: foundUser.id, userName: username }));
                     alert("התחברת בהצלחה!");
+                    SetcurrentUser(foundUser);
+                    console.log("current user" + currentUser);
                     navigate(`/home/users/${foundUser.id}`);
                 } else {
                     alert("שם המשתמש או הסיסמה אינם נכונים");
@@ -36,7 +39,7 @@ function Login() {
                     <input
                         type="text"
                         value={username}
-                        onChange={(e) =>  setUsername(e.target.value)}
+                        onChange={(e) => setUsername(e.target.value)}
                     />
                 </label>
                 <br />
