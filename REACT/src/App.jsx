@@ -19,19 +19,15 @@ function App() {
         <Routes>
           <Route path="/" element={<Aa />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />}/>
-            {/* <Route path="fullRegisteration" element={<FullRegisteration />} /> */}
+          <Route path="/register" element={<Register />} />
+          {/* <Route path="fullRegisteration" element={<FullRegisteration />} /> */}
           {/* </Route> */}
           <Route path="home/users/:id" element={<HomeLayout />}>
             <Route index element={<Home />} />
-            <Route>
-              <Route path="albums" element={<Albums />} />
-              <Route path="albums/:id" element={<Album />} />
-            </Route>
-            <Route>
-              <Route path="posts" element={<Posts />} />
-              <Route path="posts/:id" element={<Post />} />
-            </Route>
+            <Route path="albums" element={<Albums />} />
+            <Route path="albums/:id" element={<Album />} />
+            <Route path="posts" element={<Posts />} />
+            <Route path="posts/:id" element={<Post />} />
             <Route path="todos" element={<Todos />} />
           </Route>
         </Routes>

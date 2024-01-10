@@ -26,21 +26,48 @@ const Todos = () => {
       bs: "harness real-time e-markets",
     },
   };
+
   const [todos, setTodos] = useState([]);
   useEffect(() => {
-    console.log("mount");
-    console.log(todos);
     fetchData();
-
-    return () => {
-      if (todosCopy.length > 0) {
-        console.log(todos);
-        console.log("unmount");
-        console.log(todosCopy);
-        updateDataOnServer(todosCopy);
-      }
-    };
   }, []);
+
+
+
+  const [sortCriteria, setSortCriteria] = useState("sequential");
+  const [searchCriteria, setSearchCriteria] = useState("");
+
+  const filteredAndSortedTodos = todos
+    .filter((todo) => {
+      return (
+        todo.id.toString().includes(searchCriteria) ||
+        todo.title.toLowerCase().includes(searchCriteria.toLowerCase()) ||
+        todo.completed.toString().includes(searchCriteria)
+      );
+    })
+    .sort((a, b) => {
+      switch (sortCriteria) {
+        case "sequential":
+          return a.id - b.id;
+        case "performance":
+          return a.completed === b.completed ? a.id - b.id : a.completed ? -1 : 1;
+        case "alphabetical":
+          return a.title.localeCompare(b.title);
+        case "random":
+          return Math.random() - 0.5;
+        default:
+          return 0;
+      }
+    });
+
+  const handleSortChange = (e) => {
+    setSortCriteria(e.target.value);
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchCriteria(e.target.value);
+  };
+
   const fetchData = async () => {
     try {
       const response = await fetch(`http://localhost:3000/todos?userId=${currentUser.id}`);
@@ -51,23 +78,70 @@ const Todos = () => {
       console.error("Error fetching data:", error);
     }
   };
-  const updateDataOnServer = async (updatedData) => {
+  const updateDataOnServer = async (updatedData, method) => {
+    console.log(updatedData)
+    const URL = (method === 'POST') ? `http://localhost:3000/todos` : `http://localhost:3000/todos/${updatedData.id}`;
     try {
-      await fetch(`http://localhost:3000/todos?userId=${currentUser.id}/updateData`, {
-        method: "PUT", // Use the appropriate HTTP method for updating data on the server
+      await fetch(URL, {
+        method: method, // Use the appropriate HTTP method for updating data on the server
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(updatedData),
       });
-      console.log("Data updated on the server:", updatedData);
+      console.log("Data updated on the server:", updatedData.id);
     } catch (error) {
       console.error("Error updating data on the server:", error);
     }
   };
-  const todosElements = todos.map((todo, index) => (
-    <div key={todo.id} className="todo-item">
-      <span>{todo.id}</span> {/* Displaying the index (1-based) */}
+
+  function handleDelete(todo) {
+    setTodos((prevTodos) => prevTodos.filter((prevTodo) => prevTodo.id !== todo.id));
+    updateDataOnServer(todo, 'DELETE');
+  }
+
+  function handleAddTodo() {
+    setTodos((prevTodos) => {
+      const newTodo = { userId: currentUser.id, title: '', completed: false };
+      const updatedTodos = [...prevTodos, newTodo];
+      updateDataOnServer(newTodo, 'POST');
+      return updatedTodos;
+    });
+  }
+
+
+  function checkBoxChange(todoId) {
+    setTodos((prevTodos) => {
+      return prevTodos.map((todo) => {
+        if (todo.id === todoId) {
+          const updatetedtodo = { ...todo, completed: !todo.completed }
+          updateDataOnServer(updatetedtodo, 'PUT');
+          return updatetedtodo;
+        }
+        else return todo;
+      });
+    });
+  }
+
+  const textareaChange = (todoId, newText) => {
+    setTodos((prevTodos) => {
+      return prevTodos.map((todo) => {
+        //const todo = todo.id === todoId ? { ...todo, completed: !todo.completed } : todo
+        if (todo.id === todoId) {
+          const updatetedtodo = { ...todo, title: newText }
+          updateDataOnServer(updatetedtodo, 'PUT');
+          return updatetedtodo;
+        }
+        else {
+          return todo;
+        }
+      }
+      );
+    });
+  };
+  const todosElements = filteredAndSortedTodos.map((todo, index) => (
+    <div key={index} className="todo-item">
+      <span>{index + 1}</span> {/* Displaying the index (1-based) */}
       <textarea
         value={todo.title}
         onChange={(e) => textareaChange(todo.id, e.target.value)}
@@ -77,38 +151,29 @@ const Todos = () => {
         checked={todo.completed}
         onChange={() => checkBoxChange(todo.id)} // Assuming you have a function to handle checkbox change
       />
+      <button onClick={() => handleDelete(todo)}>delete</button>
     </div>
   ));
-
-  function checkBoxChange(todoId) {
-    console.log(todos);
-    todosCopy = todos.map((todo) =>
-      todo.id === todoId ? { ...todo, completed: !todo.completed } : todo
-    );
-    console.log(todosCopy);
-    setTodos((prevTodos) => {
-      console.log("checkBoxChange");
-      // Map over the previous todos and toggle the 'completed' property of the matching todo
-      return prevTodos.map((todo) =>
-        todo.id === todoId ? { ...todo, completed: !todo.completed } : todo
-      );
-    });
-    setTodos(todosCopy);
-    console.log(todos);
-    updateDataOnServer(todosCopy);
-  }
-
-  const textareaChange = (todoId, newText) => {
-    setTodos((prevTodos) => {
-      return prevTodos.map((todo) =>
-        todo.id === todoId ? { ...todo, title: newText } : todo
-      );
-    });
-  };
   return (
     <div className="todo-list-container">
       <h1>Explore our van options</h1>
+      <div>
+        <label>
+          Sort by:
+          <select value={sortCriteria} onChange={handleSortChange}>
+            <option value="sequential">Sequential</option>
+            <option value="performance">Performance</option>
+            <option value="alphabetical">Alphabetical</option>
+            <option value="random">Random</option>
+          </select>
+        </label>
+        <label>
+          Search:
+          <input type="text" value={searchCriteria} onChange={handleSearchChange} />
+        </label>
+      </div>
       <div className="todo-list">{todosElements}</div>
+      <button onClick={() => handleAddTodo()}>add todo</button>
     </div>
   );
 }

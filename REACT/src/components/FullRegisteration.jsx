@@ -1,21 +1,8 @@
-// function FullRegisteration(password, userName) {
-
-
-
-
-//   return (
-//     <>
-//       <h1>home</h1>
-//     </>
-//   )
-// }
-
-// export default FullRegisteration
 
 import React, { useState } from 'react';
 
-const FullRegistration = ({ user }) => {
-  const [editedUser, setEditedUser] = useState({ ...user });
+function FullRegistration  ({ password, userName }) {
+  const [editedUser, setEditedUser] = useState({});
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
