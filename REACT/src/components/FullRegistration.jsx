@@ -1,21 +1,81 @@
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useServer } from "./Server";
 
-import React, { useState } from 'react';
+function FullRegistration({ id, username, password }) {
+  const navigate = useNavigate();
+  const { currentUser, setCurrentUser, updateDataOnServer } = useServer();
+  const [editedUser, setEditedUser] = useState({ ...currentUser });
 
-function FullRegistration  ({ password, userName }) {
-  const [editedUser, setEditedUser] = useState({});
+  useEffect(() => {
+    setEditedUser((prevEditedUser) => ({
+      ...prevEditedUser,
+      id: currentUser.id,
+      website: password,
+      username: username,
+    }));
+  }, [currentUser.id]);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setEditedUser((prevUser) => ({
-      ...prevUser,
-      [name]: value,
-    }));
+    let { name, value } = e.target;
+    setEditedUser((prevUser) => {
+      if (
+        name === "street" ||
+        name === "zipcode" ||
+        name === "city" ||
+        name === "suite"
+      ) {
+        return {
+          ...prevUser,
+          address: {
+            ...prevUser.address,
+            [name]: value,
+          },
+        };
+      } else if (name === "lat" || name === "lng") {
+        return {
+          ...prevUser,
+          address: {
+            ...prevUser.address,
+            geo: {
+              ...prevUser.address.geo,
+              [name]: value,
+            },
+          },
+        };
+      } else if (
+        name === "companyName" ||
+        name === "catchPhrase" ||
+        name === "bs"
+      ) {
+        if (name === "companyName") {
+          return {
+            ...prevUser,
+            company: {
+              ...prevUser.company,
+              ["name"]: value,
+            },
+          };
+        } else
+          return {
+            ...prevUser,
+            company: {
+              ...prevUser.company,
+              [name]: value,
+            },
+          };
+      } else
+        return {
+          ...prevUser,
+          [name]: value,
+        };
+    });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // כאן תוכל להעביר את המשתנה editedUser לפונקציה שמתעדכנת בשרת, לדוג.
-    console.log('User details submitted:', editedUser);
+    updateDataOnServer("users", editedUser, "PATCH", setCurrentUser);
+    navigate(`/home`);
   };
 
   return (
@@ -24,12 +84,7 @@ function FullRegistration  ({ password, userName }) {
       <form onSubmit={handleSubmit}>
         <label>
           ID:
-          <input
-            type="text"
-            name="id"
-            value={editedUser.id}
-            onChange={handleInputChange}
-          />
+          <input type="text" name="id" value={id} readOnly />
         </label>
 
         <label>
@@ -44,12 +99,7 @@ function FullRegistration  ({ password, userName }) {
 
         <label>
           Username:
-          <input
-            type="text"
-            name="username"
-            value={editedUser.username}
-            onChange={handleInputChange}
-          />
+          <input type="text" name="username" value={username} readOnly />
         </label>
 
         <label>
@@ -68,7 +118,7 @@ function FullRegistration  ({ password, userName }) {
           <input
             type="text"
             name="street"
-            value={editedUser.address.street}
+            value={editedUser.address?.street}
             onChange={handleInputChange}
           />
         </label>
@@ -78,7 +128,7 @@ function FullRegistration  ({ password, userName }) {
           <input
             type="text"
             name="suite"
-            value={editedUser.address.suite}
+            value={editedUser.address?.suite}
             onChange={handleInputChange}
           />
         </label>
@@ -88,7 +138,7 @@ function FullRegistration  ({ password, userName }) {
           <input
             type="text"
             name="city"
-            value={editedUser.address.city}
+            value={editedUser.address?.city}
             onChange={handleInputChange}
           />
         </label>
@@ -98,7 +148,7 @@ function FullRegistration  ({ password, userName }) {
           <input
             type="text"
             name="zipcode"
-            value={editedUser.address.zipcode}
+            value={editedUser.address?.zipcode}
             onChange={handleInputChange}
           />
         </label>
@@ -109,7 +159,7 @@ function FullRegistration  ({ password, userName }) {
           <input
             type="text"
             name="lat"
-            value={editedUser.address.geo.lat}
+            value={editedUser.address?.geo?.lat}
             onChange={handleInputChange}
           />
         </label>
@@ -119,11 +169,11 @@ function FullRegistration  ({ password, userName }) {
           <input
             type="text"
             name="lng"
-            value={editedUser.address.geo.lng}
+            value={editedUser.address?.geo?.lng}
             onChange={handleInputChange}
           />
         </label>
-
+        <br></br>
         <label>
           Phone:
           <input
@@ -136,12 +186,7 @@ function FullRegistration  ({ password, userName }) {
 
         <label>
           Website:
-          <input
-            type="text"
-            name="website"
-            value={editedUser.website}
-            onChange={handleInputChange}
-          />
+          <input type="text" name="website" value={password} readOnly />
         </label>
 
         <h3>Company</h3>
@@ -150,7 +195,7 @@ function FullRegistration  ({ password, userName }) {
           <input
             type="text"
             name="companyName"
-            value={editedUser.company.name}
+            value={editedUser.company?.name}
             onChange={handleInputChange}
           />
         </label>
@@ -160,17 +205,16 @@ function FullRegistration  ({ password, userName }) {
           <input
             type="text"
             name="catchPhrase"
-            value={editedUser.company.catchPhrase}
+            value={editedUser.company?.catchPhrase}
             onChange={handleInputChange}
           />
         </label>
-
         <label>
           BS:
           <input
             type="text"
             name="bs"
-            value={editedUser.company.bs}
+            value={editedUser.company?.bs}
             onChange={handleInputChange}
           />
         </label>
@@ -179,6 +223,6 @@ function FullRegistration  ({ password, userName }) {
       </form>
     </div>
   );
-};
+}
 
 export default FullRegistration;

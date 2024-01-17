@@ -1,46 +1,36 @@
 import "./App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import React, { createContext, useState } from "react";
-
-import Login from "./components/Login";
-import Register from "./components/Register";
-import FullRegisteration from "./components/FullRegisteration"
-import Home from "./components/Home";
-import Albums from "./components/Albums";
-import Album from "./components/Album";
-import Posts from "./components/Posts";
-import Post from "./components/Post";
-import Todos from "./components/Todos";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Server from "./components/Server";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Home from "./pages/Home";
+import Albums from "./pages/Albums";
+import Album from "./pages/Album";
+import Posts from "./pages/Posts";
+import Todos from "./pages/Todos";
 import HomeLayout from "./components/HomeLayout";
-import Aa from "./components/Aa";
-export const currentUserProvider = createContext(null);
+import Info from "./pages/Info";
 
 function App() {
-const [currentUser,setCurrentUser]=useState({});
-
   return (
-    <>
-
+    <Server>
       <BrowserRouter>
         <Routes>
-          <currentUser.Provider value={{currentUser, setCurrentUser}}>
-            <Route path="/" element={<Aa />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            {/* <Route path="fullRegisteration" element={<FullRegisteration />} /> */}
-            {/* </Route> */}
-            <Route path="home/users/:id" element={<HomeLayout />}>
-              <Route index element={<Home />} />
-              <Route path="albums" element={<Albums />} />
-              <Route path="albums/:id" element={<Album />} />
-              <Route path="posts" element={<Posts />} />
-              <Route path="posts/:id" element={<Post />} />
-              <Route path="todos" element={<Todos />} />
-            </Route>
-          </currentUser.Provider>
+          <Route path="/" element={<Navigate to="/login" />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="home" element={<HomeLayout />}>
+            <Route index element={<Home />} />
+            <Route path="users/:userId" element={<Info />} />
+            <Route path="users/:userId/albums" element={<Albums />} />
+            <Route path="users/:userId/albums/:albumId" element={<Album />} />
+            <Route path="users/:userId/posts" element={<Posts />} />
+            <Route path="users/:userId/posts/:id" element={<Posts />} />
+            <Route path="users/:userId/todos" element={<Todos />} />
+          </Route>
         </Routes>
       </BrowserRouter>
-    </>
+    </Server>
   );
 }
 
